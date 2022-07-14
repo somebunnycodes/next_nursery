@@ -1,0 +1,30 @@
+Project Title: Next Nursery (formerly Upsy Daisy)
+
+GIT: https://github.com/somebunnycodes/next_nursery.git
+Description: 2nd hand toy and clothes platform for national Swiss market
+Stack: Python
+
+Core features: 
+    github + gitignore + deployment to AWS
+    full CRUD for sale listings
+    product categories
+    CSS (bootstrap)
+    Validations on logins, fields, passwords, etc
+    Route protections
+    Responsive
+    Photo file uploads for listings
+    APIs (currency converter - which one TBD)
+    Flask
+
+Backlog features:
+    Multiple photos
+    google sign-in
+    functioning checkout
+    google pay / paypal / stripe APIs
+    user to user messages (vendor-customer)
+    listing reviews
+    category hierarchies
+    product catalogues (to enable product reviews)
+
+Post-stack plans for project:
+    port over to shopify and take the project live
