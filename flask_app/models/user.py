@@ -36,17 +36,15 @@ class User:
     @staticmethod
     def validate_registration(data):
         is_valid = True
-        # 1. First Name - letters only, at least 2 characters and that it was submitted
+
         if not NAME_REGEX.match(data[FIRST_NAME]):
             flash('First name must be at least 2 characters and only letters', 'register')
             is_valid = False
 
-        # 2. Last Name - letters only, at least 2 characters and that it was submitted
         if not NAME_REGEX.match(data[LAST_NAME]):
             flash('Last name must be at least 2 characters and only letters', 'register')
             is_valid = False
 
-        # ADD - User Name - letters only, at least 2 characters, does not already exist in the database, and that it was submitted
         if not NAME_REGEX.match(data[USER_NAME]):
             flash('Valid user name required', 'register')
             is_valid = False
@@ -54,20 +52,19 @@ class User:
             flash('User name already exists', 'register')
             is_valid = False
         
-        # 3. Email - valid Email format, does not already exist in the database, and that it was submitted
         if not EMAIL_REGEX.match(data[EMAIL]):
             flash('Valid email required', 'register')
+            is_valid = False
+        elif not data['confirm_email'] == data['email']:
+            flash('Emails must match', 'register')
             is_valid = False
         elif User.get_by_email(data[EMAIL]): 
             flash('Account already exists', 'register')
             is_valid = False
 
-        # 4. Password - at least 8 characters, and that it was submitted
         if not PASSWORD_REGEX.match(data['password']):
             flash('Password must be at least 8 characters and contain at least one digit and one capital letter', 'register')
             is_valid = False
-
-        # 5. Password Confirmation - matches password
         if not data['confirm_password'] == data['password']:
             flash('Passwords must match', 'register')
             is_valid = False

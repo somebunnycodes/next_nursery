@@ -33,8 +33,25 @@ class Listing:
 
     @classmethod
     def list_all_listings(cls):
-        query = f"SELECT listings.*, users.user_name as {SELLER_NAME}, brands.name as {BRAND_NAME} FROM listings LEFT JOIN users ON users.{ID}=listings.{SELLER_ID} LEFT JOIN listings ON listings.brand_id=brands.{ID} GROUP BY listings.{ID};"
+        query = f"SELECT listings.*, users.user_name as seller_name, brands.name as brand_name FROM listings LEFT JOIN users ON users.id=listings.seller_id LEFT JOIN brands ON brands.id=listings.brand_id GROUP BY listings.id;"
         results = connectToMySQL(DB_NAME).query_db(query)
+        print(results)
+
+        listings = []
+        
+        for listing in results:
+            listings.append(cls(listing))
+        
+        return listings
+
+    @classmethod
+    def list_user_listings(cls, user_id):
+        query = f"SELECT listings.*, users.user_name as seller_name, brands.name as brand_name FROM listings LEFT JOIN users ON users.id=listings.seller_id LEFT JOIN brands ON brands.id=listings.brand_id WHERE listings.seller_id=%(seller_id)s GROUP BY listings.id;"
+        data={
+            SELLER_ID: user_id
+        }
+        results = connectToMySQL(DB_NAME).query_db(query, data)
+        print(results)
 
         listings = []
         
