@@ -2,7 +2,7 @@ from flask import request, redirect, render_template, session
 from flask_app import app
 from flask_app.models.brand import Brand
 from flask_app.models.user import User
-from flask_app.models.listing import BRAND_ID, DESCRIPTION, PRICE, TITLE, Listing 
+from flask_app.models.listing import BRAND_ID, DESCRIPTION, ID, IMAGE_ID, PRICE, SELLER_ID, TITLE, Listing 
 
 @app.route('/home', methods=["GET"])
 def show_home():
@@ -19,7 +19,7 @@ def show_home():
     return render_template("home.html", user=user, listings=listings)
 
 @app.route('/listings', methods=["GET"])
-def show_listings():
+def home():
     if 'user_id' not in session:
         return redirect('/logout')
 
@@ -31,6 +31,22 @@ def show_listings():
     listings = Listing.list_user_listings(user.id)
 
     return render_template("listings.html", user=user, listings=listings)
+
+@app.route('/brands/<brand_id>/listings', methods=["GET"])
+def brand_listings(brand_id):
+    if 'user_id' not in session:
+        return redirect('/logout')
+
+    user = User.get_by_id(session['user_id'])
+
+    if not user:
+        return redirect('/logout')
+
+    brand = Brand.get_by_id(brand_id)
+
+    listings = Listing.list_brand_listings(brand_id)
+
+    return render_template("brand_listings.html", user=user, listings=listings, brand=brand)
 
 @app.route('/new_listing', methods=['GET'])
 def new_listing():
@@ -55,11 +71,55 @@ def new_listing():
 
 @app.route('/new_listing', methods=['POST'])
 def post_listing():
-    if not Listing.validate_create_or_update(request.form):
-        user = User.get_by_id(session['user_id'])
-        return render_template('new_listing.html', user=user, listing=request.form)
+    user = User.get_by_id(session['user_id'])
 
-    Listing.create_listing(request.form)
-    return redirect('/dashboard')
+    if not Listing.validate_create_or_update(request.form):
+        brands = Brand.list_all_brands()
+        return render_template('new_listing.html', user=user, brands=brands, listing=request.form)
+
+    data = {
+        TITLE: request.form[TITLE],
+        BRAND_ID: request.form[BRAND_ID],
+        PRICE: request.form[PRICE],
+        IMAGE_ID: "", #TODO Image id
+        DESCRIPTION: request.form[DESCRIPTION],
+        SELLER_ID: user.id
+    }
+
+    Listing.create_listing(data)
+    return redirect('/listings')
+
+@app.route('/listings/<listing_id>/edit', methods=['GET'])
+def edit_listing(listing_id):
+    listing=Listing.get_by_id(listing_id)
+    brands = Brand.list_all_brands()
+    user = User.get_by_id(session["user_id"])
+    return render_template('edit_listing.html', user=user, brands=brands, listing=listing)
+
+@app.route('/listings/<listing_id>', methods=['POST'])
+def update_listing(listing_id):
+    listing=Listing.get_by_id(listing_id)
+    brands = Brand.list_all_brands()
+    user = User.get_by_id(session["user_id"])
+    if not Listing.validate_create_or_update(request.form):
+        brands = Brand.list_all_brands()
+        return render_template('edit_listing.html', user=user, brands=brands, listing=request.form)
+
+    data = {
+        ID: listing_id,
+        TITLE: request.form[TITLE],
+        BRAND_ID: request.form[BRAND_ID],
+        PRICE: request.form[PRICE],
+        IMAGE_ID: "", #TODO Image id
+        DESCRIPTION: request.form[DESCRIPTION],
+        SELLER_ID: user.id
+    }
+    Listing.update_listing(data)
+    return redirect('/listings')
+
+@app.route('/listings/<listing_id>/delete', methods=['GET'])
+def delete_listing(listing_id):
+    Listing.delete_listing(listing_id)
+    return redirect('/listings')
 
 

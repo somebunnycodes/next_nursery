@@ -25,3 +25,20 @@ class Brand:
             brands.append(cls(brand))
         
         return brands
+    
+    @classmethod
+    def get_by_id(cls, id):
+        query = f"SELECT * FROM brands WHERE {ID}=%({ID})s;"
+
+        data = {
+            ID: id
+        }
+
+        results = connectToMySQL(DB_NAME).query_db(query,data)
+
+        if len(results) < 1:
+            return False
+
+        return cls(results[0])
+
+

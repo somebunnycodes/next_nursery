@@ -23,9 +23,21 @@
     </nav>
     <div class="container">
         <div class="row mt-3">
-            <div class="col-12">
+            <div class="col-6 offset-3">
                 <table class="table">
-                    
+                    {% for listing in listings: %}
+                        <tr>
+                            <td>
+                                <img src="" width="64" height="64"/>
+                            </td>
+                            <td>
+                                <h3>{{listing.title}}</h3> 
+                                <h3>Price: {{listing.price}}</h3> 
+                                <a href="/listings/{{listing.id}}/edit" class="btn btn-primary">Update</a>
+                                <a href="/listings/{{listing.id}}/delete" class="btn btn-primary">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
                 </table>
             </div>
         </div>

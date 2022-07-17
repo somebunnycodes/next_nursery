@@ -61,8 +61,23 @@ class Listing:
         return listings
 
     @classmethod
+    def list_brand_listings(cls, brand_id):
+        query = f"SELECT listings.*, users.user_name as seller_name, brands.name as brand_name FROM listings LEFT JOIN users ON users.id=listings.seller_id LEFT JOIN brands ON brands.id=listings.brand_id WHERE listings.brand_id=%(brand_id)s GROUP BY listings.id;"
+        data={
+            BRAND_ID: brand_id
+        }
+        results = connectToMySQL(DB_NAME).query_db(query, data)
+
+        listings = []
+        
+        for listing in results:
+            listings.append(cls(listing))
+        
+        return listings
+
+    @classmethod
     def create_listing(cls, data):
-        query = f"INSERT INTO listings ({SELLER_ID}, {TITLE}, {PRICE}, {BRAND_ID}, {IMAGE_ID}, {DESCRIPTION}) VALUES (%({SELLER_ID})s, %({TITLE})s, %({PRICE})s, %({BRAND_ID})s, %({IMAGE_ID})s), %({DESCRIPTION});"
+        query = f"INSERT INTO listings ({SELLER_ID}, {TITLE}, {PRICE}, {BRAND_ID}, {IMAGE_ID}, {DESCRIPTION}) VALUES (%({SELLER_ID})s, %({TITLE})s, %({PRICE})s, %({BRAND_ID})s, %({IMAGE_ID})s, %({DESCRIPTION})s);"
         return connectToMySQL(DB_NAME).query_db(query, data)
 
     @classmethod
@@ -80,7 +95,7 @@ class Listing:
 
     @classmethod
     def get_by_id(cls, id):
-        query = f"SELECT listings.*, users.user_name as {SELLER_NAME}, brands.name as {BRAND_NAME} FROM listings LEFT JOIN users ON users.{ID}=listings.{SELLER_ID} LEFT JOIN listings ON listings.brand_id=brands.{ID} WHERE listings.{ID}=%({ID})s;"
+        query = f"SELECT listings.*, users.user_name as {SELLER_NAME}, brands.name as {BRAND_NAME} FROM listings LEFT JOIN users ON users.{ID}=listings.{SELLER_ID} LEFT JOIN brands ON brands.{ID}=listings.brand_id WHERE listings.{ID}=%({ID})s;"
 
         data = {
             ID: id
@@ -99,19 +114,20 @@ class Listing:
         
         print(data)
 
-        # title
         if not data[TITLE]:
             flash('Please provide a title', TITLE)
             is_valid = False
 
-        # Price
+        if not data[BRAND_ID] or data[BRAND_ID]=="0":
+            flash('Please select a brand', BRAND_ID)
+            is_valid = False
+
         if not data[PRICE]:
             flash('Please set a sale price', PRICE)
             is_valid = False
 
-        # Brand is drop down
+        # TODO: Validate image submission
 
-        # Description
         if not data[DESCRIPTION]:
             flash('Please enter a product descrpition', DESCRIPTION)
             is_valid = False
