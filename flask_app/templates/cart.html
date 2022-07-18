@@ -28,11 +28,11 @@
                     {% for listing in listings: %}
                         <tr>
                             <td>
-                                <img src="" width="64" height="64"/>
+                                <img src="https://next-nursery.s3.eu-central-1.amazonaws.com/{{listing.image_id}}" width="128" height="128"/>
                             </td>
-                            <td>
-                                <h3>{{listing.title}}</h3> 
-                                <h3>Price: {{listing.price}}</h3>
+                            <td style="width: 100%">
+                                <h4>{{listing.title}}</h4> 
+                                <h4>Price: {{listing.price}}</h4>
                                 <a href="/cart/{{listing.id}}/remove" class="btn btn-primary">Remove</a>
                             </td>
                         </tr>

@@ -8,6 +8,7 @@ flask = "*"
 pymysql = "*"
 flask-bcrypt = "*"
 awsebcli = "*"
+boto3 = "*"
 
 [dev-packages]
 

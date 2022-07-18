@@ -1,6 +1,8 @@
+import uuid
 from flask import request, redirect, render_template, session
 from flask_app import app
 from flask_app.models.brand import Brand
+from flask_app.models.image import Image
 from flask_app.models.user import User
 from flask_app.models.listing import BRAND_ID, DESCRIPTION, ID, IMAGE_ID, PRICE, SELLER_ID, TITLE, Listing 
 
@@ -77,11 +79,19 @@ def post_listing():
         brands = Brand.list_all_brands()
         return render_template('new_listing.html', user=user, brands=brands, listing=request.form)
 
+    image_file_name=""
+    if request.files["image"]:
+        file_to_upload = request.files["image"]
+        if file_to_upload: 
+            image_id = str(uuid.uuid4()) 
+            image_file_name = image_id + '.' + file_to_upload.filename.rsplit('.', 1)[1].lower()
+            Image.upload_image_to_s3(file_to_upload, image_file_name)
+
     data = {
         TITLE: request.form[TITLE],
         BRAND_ID: request.form[BRAND_ID],
         PRICE: request.form[PRICE],
-        IMAGE_ID: "", #TODO Image id
+        IMAGE_ID: image_file_name,
         DESCRIPTION: request.form[DESCRIPTION],
         SELLER_ID: user.id
     }
@@ -96,6 +106,13 @@ def edit_listing(listing_id):
     user = User.get_by_id(session["user_id"])
     return render_template('edit_listing.html', user=user, brands=brands, listing=listing)
 
+@app.route('/listings/<listing_id>', methods=['GET'])
+def view_listing(listing_id):
+    listing=Listing.get_by_id(listing_id)
+    brands = Brand.list_all_brands()
+    user = User.get_by_id(session["user_id"])
+    return render_template('view_listing.html', user=user, brands=brands, listing=listing)
+
 @app.route('/listings/<listing_id>', methods=['POST'])
 def update_listing(listing_id):
     listing=Listing.get_by_id(listing_id)
@@ -105,12 +122,20 @@ def update_listing(listing_id):
         brands = Brand.list_all_brands()
         return render_template('edit_listing.html', user=user, brands=brands, listing=request.form)
 
+    image_file_name=request.form['image_id']
+    if request.files["image"]:
+        file_to_upload = request.files["image"]
+        if file_to_upload: 
+            image_id = str(uuid.uuid4()) 
+            image_file_name = image_id + '.' + file_to_upload.filename.rsplit('.', 1)[1].lower()
+            Image.upload_image_to_s3(file_to_upload, image_file_name)
+
     data = {
         ID: listing_id,
         TITLE: request.form[TITLE],
         BRAND_ID: request.form[BRAND_ID],
         PRICE: request.form[PRICE],
-        IMAGE_ID: "", #TODO Image id
+        IMAGE_ID: image_file_name,
         DESCRIPTION: request.form[DESCRIPTION],
         SELLER_ID: user.id
     }
